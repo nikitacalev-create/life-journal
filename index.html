@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Life Log</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        body { background: #0d0d0d; color: #f0f0f0; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 600px; width: 100%; margin: 0 auto; padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        #mainPage { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+        h1 { font-size: 24px; font-weight: 300; letter-spacing: 2px; margin-bottom: 40px; }
+        .menu-button {
+            display: block; width: 100%; padding: 18px 20px; margin: 12px 0;
+            background: transparent; border: 1px solid #f0f0f0; color: #f0f0f0;
+            font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        .menu-button:hover { background: #f0f0f0; color: #0d0d0d; }
+        .top-right {
+            position: fixed; top: 20px; right: 20px; font-size: 12px;
+            background: none; border: 1px solid #555; color: #aaa;
+            padding: 8px 12px; cursor: pointer; transition: 0.3s; text-transform: uppercase;
+        }
+        .top-right:hover { border-color: #f0f0f0; color: #f0f0f0; }
+        .page { display: none; flex-direction: column; flex: 1; }
+        .page.active { display: flex; }
+        .chat-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0; border-bottom: 1px solid #333; margin-bottom: 12px;
+        }
+        .back-button {
+            background: none; border: 1px solid #555; color: #aaa;
+            padding: 6px 14px; cursor: pointer; font-size: 13px; transition: 0.3s;
+        }
+        .back-button:hover { border-color: #f0f0f0; color: #f0f0f0; }
+        .chat-title { font-size: 16px; letter-spacing: 1px; color: #f0f0f0; }
+        .messages {
+            flex: 1; overflow-y: auto; padding: 12px 0; display: flex;
+            flex-direction: column; gap: 12px; margin-bottom: 12px;
+        }
+        .message {
+            max-width: 80%; padding: 12px 16px; border-radius: 10px;
+            font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+        }
+        .message.user { align-self: flex-end; background: #222; border: 1px solid #444; }
+        .message.ai { align-self: flex-start; background: #111; border: 1px solid #333; }
+        .input-area { display: flex; gap: 8px; padding: 12px 0; border-top: 1px solid #333; }
+        .input-area input {
+            flex: 1; padding: 12px 16px; background: #1a1a1a; border: 1px solid #444;
+            color: #f0f0f0; font-size: 14px; outline: none; border-radius: 6px;
+        }
+        .input-area input::placeholder { color: #666; }
+        .input-area button {
+            padding: 12px 20px; background: transparent; border: 1px solid #f0f0f0;
+            color: #f0f0f0; font-size: 14px; cursor: pointer; transition: 0.3s; border-radius: 6px;
+        }
+        .input-area button:hover { background: #f0f0f0; color: #0d0d0d; }
+        .loading { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+        .email { text-align: center; margin-top: 30px; font-size: 14px; color: #aaa; line-height: 1.8; }
+    </style>
+</head>
+<body>
+    <!-- Главная страница -->
+    <div id="mainPage">
+        <button class="top-right" onclick="showSuggestions()">Предложения</button>
+        <div class="container">
+            <h1>LIFE·LOG</h1>
+            <button class="menu-button" onclick="startChat('plan')">Планы и задачи</button>
+            <button class="menu-button" onclick="startChat('food')">Питание</button>
+        </div>
+    </div>
+
+    <!-- Страница чата -->
+    <div id="chatPage" class="page">
+        <div class="container">
+            <div class="chat-header">
+                <button class="back-button" onclick="goHome()">← Назад</button>
+                <span class="chat-title" id="chatTitle">Чат</span>
+            </div>
+            <div class="messages" id="chatMessages"></div>
+            <div id="loadingIndicator" class="loading" style="display:none;">ИИ печатает...</div>
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Напишите сообщение..." 
+                       onkeydown="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Страница предложений -->
+    <div id="suggestionsPage" class="page">
+        <div class="container">
+            <div class="chat-header">
+                <button class="back-button" onclick="goHome()">← Назад</button>
+                <span class="chat-title">Предложения</span>
+            </div>
+            <div class="email">
+                <p>nikitacalev@gmail.com</p>
+                <p style="margin-top:20px; font-size:12px;">
+                    ЕСЛИ У ВАС ЕСТЬ ПРЕДЛОЖЕНИЯ, ЛИБО ЖЕ ВАРИАНТЫ УЛУЧШЕНИЯ НАШЕГО ТЕЛЕГРАММ БОТА, 
+                    ТО НАПИШИТЕ НАМ ПОЖАЛУЙСТА НА ПОЧТУ, КОТОРАЯ УКАЗАНА ВЫШЕ
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*** НАСТРОЙКИ ***/
+        const API_KEY = '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';   // ← Сюда вставьте новый ключ
+        const AI_MODEL = 'gpt-4o-mini';
+        /*****************/
+
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        let currentMode = '';
+        let messageHistory = [];
+
+        function startChat(mode) {
+            currentMode = mode;
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('suggestionsPage').classList.remove('active');
+            document.getElementById('suggestionsPage').style.display = 'none';
+            const chatPage = document.getElementById('chatPage');
+            chatPage.style.display = 'flex';
+            chatPage.classList.add('active');
+            
+            const titles = { plan: 'Планы и задачи', food: 'Питание' };
+            document.getElementById('chatTitle').textContent = titles[mode] || 'Чат';
+            
+            document.getElementById('chatMessages').innerHTML = '';
+            messageHistory = [];
+            
+            const prompts = {
+                plan: 'Привет! Я помогу организовать твои планы и задачи. Напиши, что ты хочешь запланировать.',
+                food: 'Привет! Расскажи, что ты сегодня съел. Я запишу и в конце дня подведу итог по КБЖУ.'
+            };
+            addMessage(prompts[mode], 'ai');
+        }
+
+        function showSuggestions() {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('chatPage').classList.remove('active');
+            document.getElementById('chatPage').style.display = 'none';
+            const sugPage = document.getElementById('suggestionsPage');
+            sugPage.style.display = 'flex';
+            sugPage.classList.add('active');
+        }
+
+        function goHome() {
+            document.getElementById('chatPage').classList.remove('active');
+            document.getElementById('chatPage').style.display = 'none';
+            document.getElementById('suggestionsPage').classList.remove('active');
+            document.getElementById('suggestionsPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'flex';
+        }
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = 'message ' + sender;
+            div.textContent = text;
+            document.getElementById('chatMessages').appendChild(div);
+            const messagesEl = document.getElementById('chatMessages');
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            
+            addMessage(text, 'user');
+            messageHistory.push({ role: 'user', content: text });
+            
+            document.getElementById('loadingIndicator').style.display = 'block';
+            
+            let systemPrompt;
+            if (currentMode === 'plan') {
+                systemPrompt = `Ты — персональный ассистент для планирования задач.
+Ты помогаешь только с планами, задачами, расписанием и рекомендациями по организации времени.
+Можешь: разбивать задачи на шаги, предлагать сроки, приоритеты, структурировать списки дел, давать советы по тайм-менеджменту.
+Если вопрос не про планирование — вежливо откажись.
+Отвечай кратко, используй списки или таблицы.`;
+            } else {
+                systemPrompt = `Ты — персональный диетолог и трекер питания.
+Запоминай всю еду, которую назвал пользователь, и по запросу «итог дня» выдавай таблицу КБЖУ.
+Можешь: подтверждать приёмы пищи, уточнять граммовку, давать рекомендации по питанию.
+Если вопрос не про питание — вежливо откажись.
+Отвечай кратко, используй таблицы для итогов.`;
+            }
+            
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + API_KEY
+                    },
+                    body: JSON.stringify({
+                        model: AI_MODEL,
+                        messages: [{ role: 'system', content: systemPrompt }, ...messageHistory],
+                        temperature: 0.7
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errData = await response.text();
+                    throw new Error('Ошибка API: ' + errData);
+                }
+                
+                const data = await response.json();
+                const reply = data.choices[0].message.content;
+                messageHistory.push({ role: 'assistant', content: reply });
+                addMessage(reply, 'ai');
+            } catch (error) {
+                addMessage('Ошибка: ' + error.message, 'ai');
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
