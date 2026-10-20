@@ -7,58 +7,118 @@
     <title>Life Log</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-        body { background: #0d0d0d; color: #f0f0f0; min-height: 100vh; display: flex; flex-direction: column; }
-        .container { max-width: 600px; width: 100%; margin: 0 auto; padding: 20px; flex: 1; display: flex; flex-direction: column; }
-        #mainPage { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
-        h1 { font-size: 24px; font-weight: 300; letter-spacing: 2px; margin-bottom: 40px; }
-        .menu-button {
-            display: block; width: 100%; padding: 18px 20px; margin: 12px 0;
-            background: transparent; border: 1px solid #f0f0f0; color: #f0f0f0;
-            font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s;
-            text-transform: uppercase;
+        body {
+            background: #0d0d0d;
+            color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle at 20% 30%, #1a1a1a 0%, #0d0d0d 70%);
         }
-        .menu-button:hover { background: #f0f0f0; color: #0d0d0d; }
+        .container { max-width: 600px; width: 100%; margin: 0 auto; padding: 20px; flex: 1; display: flex; flex-direction: column; }
+
+        /* Главная страница */
+        #mainPage { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+        .logo { font-size: 34px; font-weight: 300; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 12px; }
+        .subtitle { font-size: 14px; color: #aaa; margin-bottom: 50px; letter-spacing: 1px; }
+        .menu-card {
+            width: 100%;
+            padding: 24px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2a2a2a;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .menu-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        .menu-card .icon { font-size: 24px; margin-right: 16px; }
+        .menu-card .label { font-size: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        .menu-card .arrow { color: #888; font-size: 18px; }
+
         .top-right {
             position: fixed; top: 20px; right: 20px; font-size: 12px;
-            background: none; border: 1px solid #555; color: #aaa;
-            padding: 8px 12px; cursor: pointer; transition: 0.3s; text-transform: uppercase;
+            background: none; border: 1px solid #444; color: #999;
+            padding: 8px 14px; cursor: pointer; transition: 0.3s; border-radius: 20px;
+            text-transform: uppercase;
         }
         .top-right:hover { border-color: #f0f0f0; color: #f0f0f0; }
+
+        /* Страницы */
         .page { display: none; flex-direction: column; flex: 1; }
         .page.active { display: flex; }
+
         .chat-header {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 0; border-bottom: 1px solid #333; margin-bottom: 12px;
+            padding: 16px 0; border-bottom: 1px solid #222; margin-bottom: 16px;
         }
         .back-button {
             background: none; border: 1px solid #555; color: #aaa;
-            padding: 6px 14px; cursor: pointer; font-size: 13px; transition: 0.3s;
+            padding: 8px 16px; cursor: pointer; font-size: 13px; border-radius: 20px;
+            text-transform: uppercase; transition: 0.3s;
         }
         .back-button:hover { border-color: #f0f0f0; color: #f0f0f0; }
         .chat-title { font-size: 16px; letter-spacing: 1px; color: #f0f0f0; }
+
         .messages {
-            flex: 1; overflow-y: auto; padding: 12px 0; display: flex;
+            flex: 1; overflow-y: auto; padding: 10px 0; display: flex;
             flex-direction: column; gap: 12px; margin-bottom: 12px;
         }
         .message {
-            max-width: 80%; padding: 12px 16px; border-radius: 10px;
-            font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+            max-width: 80%; padding: 14px 18px; border-radius: 18px;
+            font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
         }
-        .message.user { align-self: flex-end; background: #222; border: 1px solid #444; }
-        .message.ai { align-self: flex-start; background: #111; border: 1px solid #333; }
-        .input-area { display: flex; gap: 8px; padding: 12px 0; border-top: 1px solid #333; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            align-self: flex-end;
+            background: #1e1e1e;
+            border-bottom-right-radius: 4px;
+            border: 1px solid #333;
+        }
+        .message.ai {
+            align-self: flex-start;
+            background: #111;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #2a2a2a;
+        }
+        .input-area {
+            display: flex; gap: 8px; padding: 12px 0;
+            background: rgba(0,0,0,0.5);
+            border-top: 1px solid #222;
+            backdrop-filter: blur(10px);
+        }
         .input-area input {
-            flex: 1; padding: 12px 16px; background: #1a1a1a; border: 1px solid #444;
-            color: #f0f0f0; font-size: 14px; outline: none; border-radius: 6px;
+            flex: 1; padding: 14px 18px; background: #1a1a1a; border: 1px solid #333;
+            color: #f0f0f0; font-size: 15px; outline: none; border-radius: 24px;
         }
+        .input-area input:focus { border-color: #f0f0f0; }
         .input-area input::placeholder { color: #666; }
-        .input-area button {
-            padding: 12px 20px; background: transparent; border: 1px solid #f0f0f0;
-            color: #f0f0f0; font-size: 14px; cursor: pointer; transition: 0.3s; border-radius: 6px;
+        .send-btn {
+            padding: 14px 24px; background: #f0f0f0; color: #0d0d0d;
+            border: none; border-radius: 24px; font-size: 14px; cursor: pointer;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            transition: transform 0.2s, background 0.2s;
         }
-        .input-area button:hover { background: #f0f0f0; color: #0d0d0d; }
-        .loading { text-align: center; padding: 20px; color: #888; font-size: 14px; }
-        .email { text-align: center; margin-top: 30px; font-size: 14px; color: #aaa; line-height: 1.8; }
+        .send-btn:hover { background: #fff; transform: scale(1.03); }
+        .loading { text-align: center; padding: 16px; color: #888; font-size: 13px; }
+
+        .email {
+            text-align: center; margin-top: 60px; font-size: 14px; color: #aaa;
+            line-height: 1.8; padding: 20px; border: 1px solid #222; border-radius: 16px;
+            background: rgba(255,255,255,0.02);
+        }
     </style>
 </head>
 <body>
@@ -66,9 +126,18 @@
     <div id="mainPage">
         <button class="top-right" onclick="showSuggestions()">Предложения</button>
         <div class="container">
-            <h1>LIFE·LOG</h1>
-            <button class="menu-button" onclick="startChat('plan')">Планы и задачи</button>
-            <button class="menu-button" onclick="startChat('food')">Питание</button>
+            <div class="logo">Life·Log</div>
+            <div class="subtitle">Твой персональный ассистент</div>
+
+            <div class="menu-card" onclick="startChat('plan')">
+                <div><span class="icon">📋</span><span class="label">Планы и задачи</span></div>
+                <span class="arrow">→</span>
+            </div>
+
+            <div class="menu-card" onclick="startChat('food')">
+                <div><span class="icon">🍎</span><span class="label">Питание</span></div>
+                <span class="arrow">→</span>
+            </div>
         </div>
     </div>
 
@@ -84,7 +153,7 @@
             <div class="input-area">
                 <input type="text" id="messageInput" placeholder="Напишите сообщение..." 
                        onkeydown="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()">Отправить</button>
+                <button class="send-btn" onclick="sendMessage()">➤</button>
             </div>
         </div>
     </div>
@@ -97,18 +166,15 @@
                 <span class="chat-title">Предложения</span>
             </div>
             <div class="email">
-                <p>nikitacalev@gmail.com</p>
-                <p style="margin-top:20px; font-size:12px;">
-                    ЕСЛИ У ВАС ЕСТЬ ПРЕДЛОЖЕНИЯ, ЛИБО ЖЕ ВАРИАНТЫ УЛУЧШЕНИЯ НАШЕГО ТЕЛЕГРАММ БОТА, 
-                    ТО НАПИШИТЕ НАМ ПОЖАЛУЙСТА НА ПОЧТУ, КОТОРАЯ УКАЗАНА ВЫШЕ
-                </p>
+                <p>Если у вас есть идеи, как улучшить Life·Log, напишите нам:</p>
+                <p style="margin-top:16px; font-weight:600;">nikitacalev@gmail.com</p>
             </div>
         </div>
     </div>
 
     <script>
         /*** НАСТРОЙКИ ***/
-        const WORKER_URL = 'https://life-journal.nikitacalev.workers.dev'; // ← ВСТАВЬТЕ URL WORKER
+        const WORKER_URL = 'https://life-log-journal.nikitacalev.workers.dev/'; // ← ВСТАВЬТЕ URL WORKER
         /*****************/
 
         const tg = window.Telegram.WebApp;
@@ -129,16 +195,14 @@
             
             const titles = { plan: 'Планы и задачи', food: 'Питание' };
             document.getElementById('chatTitle').textContent = titles[mode] || 'Чат';
-            
             document.getElementById('chatMessages').innerHTML = '';
             messageHistory = [];
-            
+
             const prompts = {
-                plan: 'Привет! Я помогу организовать твои планы и задачи. Напиши, что ты хочешь запланировать.',
-                food: 'Привет! Расскажи, что ты сегодня съел. Я запишу и в конце дня подведу итог по КБЖУ.'
+                plan: 'Привет! Я помогу организовать твои планы и задачи. Напиши, с чего начнём?',
+                food: 'Привет! Я буду вести учёт твоего питания. Что ты сегодня съел?'
             };
             addMessage(prompts[mode], 'ai');
-            // Сохраняем первое сообщение в историю? Нет, просто приветствие не отправляем в API.
         }
 
         function showSuggestions() {
@@ -180,17 +244,16 @@
             
             let systemPrompt;
             if (currentMode === 'plan') {
-                systemPrompt = `Ты — персональный ассистент для планирования задач.
-Ты помогаешь только с планами, задачами, расписанием и рекомендациями по организации времени.
-Можешь: разбивать задачи на шаги, предлагать сроки, приоритеты, структурировать списки дел, давать советы по тайм-менеджменту.
-Если вопрос не про планирование — вежливо откажись.
-Отвечай кратко, используй списки или таблицы.`;
+                systemPrompt = `Ты — Life·Log, персональный ассистент для планирования.
+Ты помогаешь только с задачами, целями, расписанием и организацией времени.
+Отвечай конкретно, давай пошаговые планы, используй таблицы и списки.
+Если вопрос не по теме — вежливо откажись вернуться к задачам пользователя.`;
             } else {
-                systemPrompt = `Ты — персональный диетолог и трекер питания.
-Запоминай всю еду, которую назвал пользователь, и по запросу «итог дня» выдавай таблицу КБЖУ.
-Можешь: подтверждать приёмы пищи, уточнять граммовку, давать рекомендации по питанию.
-Если вопрос не про питание — вежливо откажись.
-Отвечай кратко, используй таблицы для итогов.`;
+                systemPrompt = `Ты — Life·Log, персональный диетолог и трекер питания.
+Записывай каждый продукт, который называет пользователь, и его граммовку.
+По команде «итог дня» выведи аккуратную таблицу КБЖУ.
+Рекомендуй, как улучшить рацион.
+Если вопрос не по теме — вежливо откажись.`;
             }
             
             const messages = [{ role: 'system', content: systemPrompt }, ...messageHistory];
@@ -203,11 +266,13 @@
                 });
                 
                 if (!response.ok) {
-                    const errData = await response.text();
-                    throw new Error('Ошибка API: ' + errData);
+                    const errText = await response.text();
+                    throw new Error('Worker error: ' + errText);
                 }
                 
                 const data = await response.json();
+                if (data.error) throw new Error(data.error);
+                
                 const reply = data.reply;
                 messageHistory.push({ role: 'assistant', content: reply });
                 addMessage(reply, 'ai');
