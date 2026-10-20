@@ -2,286 +2,239 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <title>Life Log</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Assistant Bot</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            background: #0d0d0d;
-            color: #f0f0f0;
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #212121;
+            color: #e0e0e0;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            background-image: radial-gradient(circle at 20% 30%, #1a1a1a 0%, #0d0d0d 70%);
         }
-        .container { max-width: 600px; width: 100%; margin: 0 auto; padding: 20px; flex: 1; display: flex; flex-direction: column; }
 
-        /* Главная страница */
-        #mainPage { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
-        .logo { font-size: 34px; font-weight: 300; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 12px; }
-        .subtitle { font-size: 14px; color: #aaa; margin-bottom: 50px; letter-spacing: 1px; }
-        .menu-card {
-            width: 100%;
-            padding: 24px;
-            margin: 10px 0;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid #2a2a2a;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        #header {
+            background: #2b5277;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
         }
-        .menu-card:hover {
-            background: rgba(255,255,255,0.08);
-            border-color: #f0f0f0;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-        }
-        .menu-card .icon { font-size: 24px; margin-right: 16px; }
-        .menu-card .label { font-size: 16px; letter-spacing: 1px; text-transform: uppercase; }
-        .menu-card .arrow { color: #888; font-size: 18px; }
 
-        .top-right {
-            position: fixed; top: 20px; right: 20px; font-size: 12px;
-            background: none; border: 1px solid #444; color: #999;
-            padding: 8px 14px; cursor: pointer; transition: 0.3s; border-radius: 20px;
-            text-transform: uppercase;
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px;
         }
-        .top-right:hover { border-color: #f0f0f0; color: #f0f0f0; }
 
-        /* Страницы */
-        .page { display: none; flex-direction: column; flex: 1; }
-        .page.active { display: flex; }
-
-        .chat-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 0; border-bottom: 1px solid #222; margin-bottom: 16px;
-        }
-        .back-button {
-            background: none; border: 1px solid #555; color: #aaa;
-            padding: 8px 16px; cursor: pointer; font-size: 13px; border-radius: 20px;
-            text-transform: uppercase; transition: 0.3s;
-        }
-        .back-button:hover { border-color: #f0f0f0; color: #f0f0f0; }
-        .chat-title { font-size: 16px; letter-spacing: 1px; color: #f0f0f0; }
-
-        .messages {
-            flex: 1; overflow-y: auto; padding: 10px 0; display: flex;
-            flex-direction: column; gap: 12px; margin-bottom: 12px;
-        }
         .message {
-            max-width: 80%; padding: 14px 18px; border-radius: 18px;
-            font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
-            animation: fadeIn 0.3s ease;
+            margin-bottom: 12px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .message.user {
-            align-self: flex-end;
-            background: #1e1e1e;
-            border-bottom-right-radius: 4px;
-            border: 1px solid #333;
-        }
-        .message.ai {
-            align-self: flex-start;
-            background: #111;
-            border-bottom-left-radius: 4px;
-            border: 1px solid #2a2a2a;
-        }
-        .input-area {
-            display: flex; gap: 8px; padding: 12px 0;
-            background: rgba(0,0,0,0.5);
-            border-top: 1px solid #222;
-            backdrop-filter: blur(10px);
-        }
-        .input-area input {
-            flex: 1; padding: 14px 18px; background: #1a1a1a; border: 1px solid #333;
-            color: #f0f0f0; font-size: 15px; outline: none; border-radius: 24px;
-        }
-        .input-area input:focus { border-color: #f0f0f0; }
-        .input-area input::placeholder { color: #666; }
-        .send-btn {
-            padding: 14px 24px; background: #f0f0f0; color: #0d0d0d;
-            border: none; border-radius: 24px; font-size: 14px; cursor: pointer;
-            font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
-            transition: transform 0.2s, background 0.2s;
-        }
-        .send-btn:hover { background: #fff; transform: scale(1.03); }
-        .loading { text-align: center; padding: 16px; color: #888; font-size: 13px; }
 
-        .email {
-            text-align: center; margin-top: 60px; font-size: 14px; color: #aaa;
-            line-height: 1.8; padding: 20px; border: 1px solid #222; border-radius: 16px;
-            background: rgba(255,255,255,0.02);
+        .user-message {
+            background: #2b5277;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            background: #333;
+            color: #e0e0e0;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .error-message {
+            background: #4a1a1a;
+            color: #ff7961;
+            text-align: center;
+            max-width: 100%;
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            padding: 10px 15px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-top: 1px solid #333;
+        }
+
+        #user-input {
+            flex: 1;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #user-input:focus {
+            border-color: #2b5277;
+        }
+
+        #user-input::placeholder {
+            color: #888;
+        }
+
+        .btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn:active {
+            transform: scale(0.9);
+        }
+
+        #send-btn {
+            background: #4caf50;
+            color: white;
+        }
+
+        #voice-btn {
+            background: #ff9800;
+            color: white;
+        }
+
+        #voice-btn.listening {
+            background: #f44336;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 10px 15px;
+            background: #333;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            margin-right: auto;
+            max-width: 60px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #888;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
         }
     </style>
 </head>
 <body>
-    <!-- Главная -->
-    <div id="mainPage">
-        <button class="top-right" onclick="showSuggestions()">Предложения</button>
-        <div class="container">
-            <div class="logo">Life·Log</div>
-            <div class="subtitle">Твой персональный ассистент</div>
-
-            <div class="menu-card" onclick="startChat('plan')">
-                <div><span class="icon">📋</span><span class="label">Планы и задачи</span></div>
-                <span class="arrow">→</span>
-            </div>
-
-            <div class="menu-card" onclick="startChat('food')">
-                <div><span class="icon">🍎</span><span class="label">Питание</span></div>
-                <span class="arrow">→</span>
-            </div>
-        </div>
+    <div id="header">🤖 AI Ассистент</div>
+    
+    <div id="chat-container">
+        <div class="message bot-message">Привет! Я AI ассистент. Задавай вопросы текстом или голосом 🎤</div>
     </div>
 
-    <!-- Чат -->
-    <div id="chatPage" class="page">
-        <div class="container">
-            <div class="chat-header">
-                <button class="back-button" onclick="goHome()">← Назад</button>
-                <span class="chat-title" id="chatTitle">Чат</span>
-            </div>
-            <div class="messages" id="chatMessages"></div>
-            <div id="loadingIndicator" class="loading" style="display:none;">ИИ печатает...</div>
-            <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Напишите сообщение..." 
-                       onkeydown="if(event.key==='Enter') sendMessage()">
-                <button class="send-btn" onclick="sendMessage()">➤</button>
-            </div>
-        </div>
+    <div id="controls">
+        <input type="text" id="user-input" placeholder="Напиши сообщение...">
+        <button class="btn" id="send-btn">➤</button>
+        <button class="btn" id="voice-btn">🎤</button>
     </div>
 
-    <!-- Предложения -->
-    <div id="suggestionsPage" class="page">
-        <div class="container">
-            <div class="chat-header">
-                <button class="back-button" onclick="goHome()">← Назад</button>
-                <span class="chat-title">Предложения</span>
-            </div>
-            <div class="email">
-                <p>Если у вас есть идеи, как улучшить Life·Log, напишите нам:</p>
-                <p style="margin-top:16px; font-weight:600;">nikitacalev@gmail.com</p>
-            </div>
-        </div>
-    </div>
-
+    <!-- Подключаем Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <script>
-        /*** НАСТРОЙКИ ***/
-        const WORKER_URL = 'https://life-log-journal.nikitacalev.workers.dev/'; // ← ВСТАВЬТЕ URL WORKER
-        /*****************/
-
+        // Инициализация Telegram
         const tg = window.Telegram.WebApp;
-        tg.expand();
+        
+        // Сообщаем Telegram, что приложение готово
         tg.ready();
+        
+        // Расширяем на весь экран
+        tg.expand();
 
-        let currentMode = '';
-        let messageHistory = [];
+        // Получаем элементы
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const voiceBtn = document.getElementById('voice-btn');
 
-        function startChat(mode) {
-            currentMode = mode;
-            document.getElementById('mainPage').style.display = 'none';
-            document.getElementById('suggestionsPage').classList.remove('active');
-            document.getElementById('suggestionsPage').style.display = 'none';
-            const chatPage = document.getElementById('chatPage');
-            chatPage.style.display = 'flex';
-            chatPage.classList.add('active');
-            
-            const titles = { plan: 'Планы и задачи', food: 'Питание' };
-            document.getElementById('chatTitle').textContent = titles[mode] || 'Чат';
-            document.getElementById('chatMessages').innerHTML = '';
-            messageHistory = [];
+        // !!! ЗДЕСЬ ВСТАВЬ СВОЙ URL БОТА !!!
+        // Это URL, который ты получил от BotFather или твой Ngrok/сервер
+        const BOT_API_URL = 'https://ai-bot.nikitacalev.workers.dev';
 
-            const prompts = {
-                plan: 'Привет! Я помогу организовать твои планы и задачи. Напиши, с чего начнём?',
-                food: 'Привет! Я буду вести учёт твоего питания. Что ты сегодня съел?'
-            };
-            addMessage(prompts[mode], 'ai');
+        // Голосовой ввод
+        let recognition = null;
+        let isListening = false;
+
+        // Функция для добавления сообщения
+        function appendMessage(text, className) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+            messageDiv.textContent = text;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        function showSuggestions() {
-            document.getElementById('mainPage').style.display = 'none';
-            document.getElementById('chatPage').classList.remove('active');
-            document.getElementById('chatPage').style.display = 'none';
-            const sugPage = document.getElementById('suggestionsPage');
-            sugPage.style.display = 'flex';
-            sugPage.classList.add('active');
+        // Функция для показа индикатора набора
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        function goHome() {
-            document.getElementById('chatPage').classList.remove('active');
-            document.getElementById('chatPage').style.display = 'none';
-            document.getElementById('suggestionsPage').classList.remove('active');
-            document.getElementById('suggestionsPage').style.display = 'none';
-            document.getElementById('mainPage').style.display = 'flex';
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
         }
 
-        function addMessage(text, sender) {
-            const div = document.createElement('div');
-            div.className = 'message ' + sender;
-            div.textContent = text;
-            document.getElementById('chatMessages').appendChild(div);
-            const messagesEl = document.getElementById('chatMessages');
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-        }
+        // Функция отправки сообщения
+        async function sendMessage(text) {
+            if (!text || text.trim() === '') return;
 
-        async function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            if (!text) return;
-            input.value = '';
-            
-            addMessage(text, 'user');
-            messageHistory.push({ role: 'user', content: text });
-            
-            document.getElementById('loadingIndicator').style.display = 'block';
-            
-            let systemPrompt;
-            if (currentMode === 'plan') {
-                systemPrompt = `Ты — Life·Log, персональный ассистент для планирования.
-Ты помогаешь только с задачами, целями, расписанием и организацией времени.
-Отвечай конкретно, давай пошаговые планы, используй таблицы и списки.
-Если вопрос не по теме — вежливо откажись вернуться к задачам пользователя.`;
-            } else {
-                systemPrompt = `Ты — Life·Log, персональный диетолог и трекер питания.
-Записывай каждый продукт, который называет пользователь, и его граммовку.
-По команде «итог дня» выведи аккуратную таблицу КБЖУ.
-Рекомендуй, как улучшить рацион.
-Если вопрос не по теме — вежливо откажись.`;
-            }
-            
-            const messages = [{ role: 'system', content: systemPrompt }, ...messageHistory];
-            
-            try {
-                const response = await fetch(WORKER_URL + '/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ messages: messages })
-                });
-                
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error('Worker error: ' + errText);
-                }
-                
-                const data = await response.json();
-                if (data.error) throw new Error(data.error);
-                
-                const reply = data.reply;
-                messageHistory.push({ role: 'assistant', content: reply });
-                addMessage(reply, 'ai');
-            } catch (error) {
-                addMessage('Ошибка: ' + error.message, 'ai');
-            } finally {
-                document.getElementById('loadingIndicator').style.display = 'none';
-            }
-        }
-    </script>
-</body>
-</html>
+            // Показываем сообщение пользователя
+            appendMessage(text, 'user-message');
+            userInput.value =
