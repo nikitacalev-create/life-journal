@@ -15,62 +15,16 @@
             font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
         }
         #header {
-            padding:30px 20px 10px;
+            padding:20px;
             text-align:center;
+            border-bottom:1px solid #1f1f1f;
         }
         #header h1 {
-            font-size:30px;
+            font-size:22px;
             font-weight:300;
-            letter-spacing:3px;
+            letter-spacing:2px;
             color:#fff;
         }
-        #header p {
-            font-size:14px;
-            color:#aaa;
-            margin-top:8px;
-            letter-spacing:1px;
-        }
-        #start-screen {
+        #main {
             flex:1;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:center;
-            padding:20px;
-            gap:25px;
-        }
-        .main-btn {
-            width:280px;
-            padding:20px 0;
-            background:transparent;
-            border:1px solid #555;
-            border-radius:60px;
-            color:#ddd;
-            font-size:18px;
-            font-weight:500;
-            letter-spacing:1px;
-            cursor:pointer;
-            transition:all 0.25s;
-        }
-        .main-btn:hover { background:rgba(255,255,255,0.04); border-color:#fff; color:#fff; }
-        .main-btn:active { transform:scale(0.96); background:#1a1a1a; }
-    </style>
-</head>
-<body>
-    <div id="header">
-        <h1>Your Secondly Mom</h1>
-        <p>Твой личный ИИ-помощник</p>
-    </div>
-    <div id="start-screen">
-        <button class="main-btn" onclick="openSection('meals')">🍽 Приём пищи</button>
-        <button class="main-btn" onclick="openSection('plans')">📋 Помощь составить план</button>
-    </div>
-    <script>
-        const BOT_API_URL = 'your-secondly-mom-api.nikitacalev.workers.dev';
-        function openSection(section) {
-            // Пока просто покажем alert, позже сделаем чат
-            alert('Раздел "' + section + '" откроется после настройки бота');
-        }
-    </script>
-</body>
-</html>
+            display:
